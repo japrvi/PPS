@@ -1,57 +1,81 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 
-static void	*matrix_creator(float *m, char **argv, int size);
-static float	*matrix_multiplication(float *m1, float *m2, int rows, int cols);
+static double **matrix_creator(int rows, int cols, char **argv);
+static double **matrix_multiplication(double **m1, double **m2, int rows1, int cols1, int cols2);
+static double **matrix_create(int rows, int cols);
 
 int main(int argc, char **argv)
 {
-
-	int i = 0;
-	int m = atoi(argv[i++]);
-	int n = atoi(argv[i++]);
-	int p = atoi(argv[i++]);
-	int mn = m * n;
-	int np = n * p;
-
-	float *m1 = (float *) malloc(mn);
-	float *m2 = (float *) malloc(np);
-	matrix_creator(m1, argv + 3, mn);
-	matrix_creator(m2, argv + mn + 3, np);
-	float *res = matrix_multiplication(m1, m2, m, p);
-	free(m1); free(m2);
-	return (res);
-}
-
-static void	*matrix_creator(float *m, char **argv, int size)
-{
-	while (--size)
+	if (argc > 4)
 	{
-		m[size] = atof(argv[size]);
+		int m = atoi(argv[1]);
+		int n = atoi(argv[2]);
+		int p = atoi(argv[3]);
+		int mn = m * n;
+		//printf("dimensiones %d %d %d %d\n", m, n, p, mn);
+		double **m1 = matrix_creator(m, n, argv + 4);
+		double **m2 = matrix_creator(n, p, argv + 4 + mn);
+		double **res = matrix_multiplication(m1, m2, m, n, p);
+		/*for (int i = 0; i < m ; i++) {
+        		for (int j = 0; j < p; j++) {
+            			printf("%f ", res[i][j]);
+        		}
+        		printf("\n");
+    		}*/
 	}
+	else
+		return (-1);
+	return (0);
 }
 
-static float	*matrix_multiplication(float *m1, float *m2, int rows, int cols)
+static double **matrix_creator(int rows, int cols, char **argv)
 {
-	unsigned int i = 0;
-	unsigned int j = 0;
-	unsigned int m = 0;
-	float *res = (float *) malloc(rows * cols);
-	float aux = 0;
+	double **matriz = (double **) malloc(sizeof(double *) * rows);
+	unsigned int count = 0;
 
-	while (i < rows)
+	for (int i = 0; i < rows; i++)
 	{
-		while(j < cols)
+		matriz[i] = (double *) malloc (cols * sizeof(double));
+		for(int j = 0; j < cols; j++)
 		{
-			aux += m1[i + j] * m2[i + cols * j];
-			j++;
+			matriz[i][j] = atof(argv[count]);
+			count++;
 		}
-		j = 0;
-		res[m] = aux;
-		m++;
-		i++;
+	}
+	return (matriz);
+}
+
+static double **matrix_create(int rows, int cols)
+{
+	double **matriz = (double **) malloc(sizeof(double *) * rows);
+	unsigned int count = 0;
+
+	for (int i = 0; i < rows; i++)
+	{
+		matriz[i] = (double *) malloc (cols * sizeof(double));
+	}
+	return (matriz);
+}
+
+static double **matrix_multiplication(double **m1, double **m2, int rows1, int cols1, int cols2)
+{
+	double **res;
+	double aux;
+
+	res = matrix_create(rows1, cols2);
+	for (int i = 0; i < cols2; i++)
+	{
+		for (int j = 0; j < rows1; j++)
+		{
+			aux = 0;
+			for (int k = 0; k < cols1; k++)
+			{
+				aux += m1[j][k] * m2[k][i];
+			}
+			res[j][i] = aux;
+		}
 	}
 	return (res);
 }
